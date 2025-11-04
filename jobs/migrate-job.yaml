@@ -3,13 +3,19 @@ kind: Job
 metadata:
   name: migrate-job
   namespace: dev
+  annotations:
+    # ArgoCD hook: ejecutar antes de aplicar recursos (pre-sync)
+    argocd.argoproj.io/hook: PreSync
+    # borrar el hook si tuvo éxito
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    # en caso de querer conservar el Job para debugging, se puede usar HookSucceeded,HookFailed
 spec:
   backoffLimit: 3
   template:
     spec:
       containers:
         - name: migrate
-          image: ghcr.io/tomasignacio/backend:latest
+          image: docker.io/tomasignacio/backend:latest
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:

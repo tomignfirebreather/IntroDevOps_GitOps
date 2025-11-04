@@ -1,2 +1,4 @@
 base/secret.yaml
-base/secret.yaml
+secret-plain.yaml
+*.pem
+
