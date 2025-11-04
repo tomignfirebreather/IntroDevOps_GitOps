@@ -1,12 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ../../base
+- ../../base
 namespace: dev
 images:
-  - name: docker.io/tomasignacio/backend
-    newName: docker.io/tomasignacio/backend
-    newTag: "latest"
-  - name: docker.io/tomasignacio/frontend
-    newName: docker.io/tomasignacio/frontend
-    newTag: "latest"
+- name: docker.io/tomasignacio/backend
+  newName: tomasignacio/backend
+  newTag: abad65b19d1563720acb59fbd7c2b4ecd9670951
+- name: docker.io/tomasignacio/frontend
+  newName: tomasignacio/frontend
+  newTag: abad65b19d1563720acb59fbd7c2b4ecd9670951
