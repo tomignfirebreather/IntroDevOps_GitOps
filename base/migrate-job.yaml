@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: migrate
-          image: docker.io/tomasignacio/backend:latest
+          image: docker.io/tomasignacio/backend:abad65b19d1563720acb59fbd7c2b4ecd9670951
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
