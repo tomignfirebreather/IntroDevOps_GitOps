@@ -1,0 +1,193 @@
+# Stage 05 — Argo CD + GitOps + Sealed Secrets en Minikube
+
+## 🎯 Objetivo
+Implementar **GitOps** con **Argo CD**, desplegando la aplicación desde un repositorio GitOps, gestionando los secretos con **SealedSecrets**, y accediendo a la **interfaz UI de Argo CD** en un entorno local con **Minikube**.
+
+---
+
+## 🧩 Requisitos previos
+- Minikube instalado (`minikube start`)
+- `kubectl` configurado para el clúster local
+- Acceso al repositorio GitOps (`IntroDevOps_GitOps`)
+- Archivos `base/`, `overlays/dev` y `sealedsecret.yaml` correctamente definidos
+
+---
+
+## ⚙️ 1. Preparar el entorno de Minikube
+
+Iniciar Minikube:
+
+```bash
+minikube start --driver=docker
+```
+
+Verificar que el clúster esté corriendo:
+
+```bash
+kubectl get nodes
+```
+
+---
+
+## 🌐 2. Habilitar el add-on Ingress
+
+Argo CD y algunos servicios (frontend/backend) pueden necesitar acceso externo.  
+Activamos el **addon `ingress`** de Minikube:
+
+```bash
+minikube addons enable ingress
+```
+
+Verificar que el controlador esté en ejecución:
+
+```bash
+kubectl get pods -n ingress-nginx | grep ingress
+```
+
+---
+
+## 🔐 3. Instalar el controlador de Sealed Secrets
+
+### Crear el namespace:
+```bash
+kubectl create namespace kube-system --dry-run=client -o yaml | kubectl apply -f -
+```
+
+### Instalar Sealed Secrets desde Bitnami:
+```bash
+kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.26.0/controller.yaml
+```
+
+Verificar instalación:
+```bash
+kubectl get pods -n kube-system | grep sealed-secrets
+```
+
+### Exportar la clave pública (opcional, si vas a sellar secretos manualmente):
+```bash
+kubectl -n kube-system get secret -l sealedsecrets.bitnami.com/sealed-secrets-key   -o jsonpath="{.items[0].data['tls\.crt']}" | base64 --decode > pub-cert.pem
+```
+
+---
+
+## 🚀 4. Instalar Argo CD
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+Verificar:
+```bash
+kubectl get pods -n argocd
+```
+
+> Puede tardar unos minutos hasta que todos los pods estén en **Running**.
+
+---
+
+## 🔑 5. Obtener la contraseña de administrador
+
+```bash
+kubectl get secret argocd-initial-admin-secret -n argocd   -o jsonpath="{.data.password}" | base64 --decode; echo
+```
+
+Usuario: `admin`
+
+---
+
+## 🌍 6. Exponer la UI de Argo CD
+
+### Opción A — Port-forward (simple)
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+Ingresar:  
+🔗 https://localhost:8080
+
+Ignorar el aviso de certificado no seguro.
+
+---
+
+### Opción B — Service con Minikube
+```bash
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+minikube service argocd-server -n argocd
+```
+
+Esto abrirá automáticamente la interfaz web en tu navegador.
+
+---
+
+## 🧭 7. Iniciar sesión en la UI
+
+- **Username:** `admin`  
+- **Password:** (contraseña obtenida en el paso anterior)
+
+---
+
+## 🧱 8. Crear la aplicación GitOps desde la UI
+
+1. En la UI → **New App**
+2. Completar los campos:
+
+| Campo | Valor |
+|-------|-------|
+| **Application Name** | `intro-devops` |
+| **Project** | `default` |
+| **Sync Policy** | Manual |
+| **Repository URL** | `https://github.com/tomignfirebreather/IntroDevOps_GitOps.git` |
+| **Revision** | `main` |
+| **Path** | `overlays/dev` |
+| **Cluster** | `https://kubernetes.default.svc` |
+| **Namespace** | `dev` |
+
+3. Crear y luego hacer clic en **SYNC** para desplegar los recursos.
+
+---
+
+## 🔄 9. Verificar la sincronización
+
+En la UI:
+- **Healthy ✔️** → Todos los recursos desplegados correctamente.
+- **OutOfSync ⚠️** → Cambios detectados en Git, requiere nuevo sync.
+- **Error ❌** → Revisar logs del pod con error.
+
+Desde la consola:
+```bash
+kubectl get all -n dev
+```
+
+---
+
+## 🧩 10. Acceso a la aplicación desplegada
+
+Exponer los servicios localmente:
+
+```bash
+kubectl port-forward svc/frontend -n dev 5173:80
+kubectl port-forward svc/backend -n dev 8000:8000
+```
+
+Luego acceder:
+- Frontend → [http://localhost:5173](http://localhost:5173)
+- Backend → [http://localhost:8000](http://localhost:8000)
+
+---
+
+## 🧹 11. Limpieza del entorno (opcional)
+
+Eliminar Argo CD y SealedSecrets:
+
+```bash
+kubectl delete ns argocd
+kubectl delete -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.26.0/controller.yaml
+```
+
+---
+
+## 🧠 Valor agregado
+- **GitOps completo:** el repositorio Git define el estado deseado del clúster.  
+- **Automatización CI/CD:** el pipeline actualiza imágenes y Argo CD aplica cambios.  
+- **Gestión segura de secretos:** los `SealedSecrets` evitan exponer claves en GitHub.  
+- **Monitoreo visual:** la UI permite observar el estado y sincronización en tiempo real.  
