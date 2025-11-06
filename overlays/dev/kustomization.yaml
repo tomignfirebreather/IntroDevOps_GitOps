@@ -9,7 +9,7 @@ namespace: dev
 images:
 - name: docker.io/tomasignacio/backend
   newName: tomasignacio/backend
-  newTag: c6549d23696eb0b37787b1be1a7248084cb1cae6
+  newTag: cb209c9bec4e8e89802524fee101fd42f3a140dd
 - name: docker.io/tomasignacio/frontend
   newName: tomasignacio/frontend
-  newTag: c6549d23696eb0b37787b1be1a7248084cb1cae6
+  newTag: cb209c9bec4e8e89802524fee101fd42f3a140dd
