@@ -4,6 +4,7 @@ metadata:
   name: migrate-job
   namespace: dev
   annotations:
+    argocd.argoproj.io/sync-wave: "1"
     # ArgoCD hook: ejecutar antes de aplicar recursos (pre-sync)
     argocd.argoproj.io/hook: PreSync
     # borrar el hook si tuvo éxito
