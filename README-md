@@ -68,6 +68,15 @@ kubectl get pods -n kube-system | grep sealed-secrets
 kubectl -n kube-system get secret -l sealedsecrets.bitnami.com/sealed-secrets-key   -o jsonpath="{.items[0].data['tls\.crt']}" | base64 --decode > pub-cert.pem
 ```
 
+### Generar el SealedSecret
+```bash
+kubeseal --format yaml \
+ ✔  minikube 󱃾  18:18:51 
+  --controller-name=sealed-secrets-controller \
+  --controller-namespace=kube-system \
+  < secret-plain.yaml > base/secrets-sealed.yaml
+```
+
 ---
 
 ## 🚀 4. Instalar Argo CD
