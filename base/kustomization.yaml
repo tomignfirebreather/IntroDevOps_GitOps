@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - configmap.yaml
-  - secret.yaml
+  - secret-sealed.yaml
   - migrate-job.yaml
   - ingress.yaml
   - postgres-pvc.yaml
