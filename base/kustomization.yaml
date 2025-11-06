@@ -5,8 +5,9 @@ resources:
   - namespace.yaml
   - configmap.yaml
   - sealedsecret.yaml
-  - secret.yaml
-  - migrate-job.yaml
+  - sealedsecret.yaml
+  - ingress.yaml
+  - sealedsecret.yaml
   - postgres-pvc.yaml
   - postgres-deployment.yaml
   - backend-deployment.yaml
