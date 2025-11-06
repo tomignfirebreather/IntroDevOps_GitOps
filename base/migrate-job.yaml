@@ -4,11 +4,10 @@ metadata:
   name: migrate-job
   namespace: dev
   annotations:
-    # ArgoCD hook: ejecutar antes de aplicar recursos (pre-sync)
-    argocd.argoproj.io/hook: PreSync
+    # ArgoCD hook: ejecutar después de que todos los recursos estén desplegados
+    argocd.argoproj.io/hook: PostSync
     # borrar el hook si tuvo éxito
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
-    # en caso de querer conservar el Job para debugging, se puede usar HookSucceeded,HookFailed
 spec:
   backoffLimit: 3
   template:
